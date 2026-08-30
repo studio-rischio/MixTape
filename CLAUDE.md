@@ -32,6 +32,12 @@ open -a Xcode MixTape.xcodeproj   # or open in Xcode and ⌘R
 
 No tests, lint config, or package manifests exist. No third-party dependencies — only `SQLite3` (system), SwiftUI, AppKit, Foundation, OSLog.
 
+The build is warning-clean except for one known one: `main actor-isolated static property 'defaultSimilarityAlgorithm' can not be referenced from a nonisolated context` at [ListenBrainzClient.swift:272](MixTape/ListenBrainzClient.swift#L272). Pre-existing — you didn't introduce it.
+
+**Never `xcodebuild` a Release you intend to publish — use [build.sh](build.sh).** The four extra settings it passes are load-bearing for a public download, and its header comment explains each: without them the linker's debug map leaves the builder's `/Users/<you>/` path in the binary ~40 times (in the symbol table, so `strings` won't show it), and Xcode injects `com.apple.security.get-task-allow`, which lets any process attach a debugger to the shipped app. Ship **only** the `.app` — the `.dSYM` built alongside it contains full build paths by design.
+
+`agent_space/` is git-ignored scratch for working notes; nothing there is part of the build.
+
 To actually exercise the app you need Doppler installed with a populated library, and LM Studio running with a model loaded at ≥ 8 K context. Without those, most of the interesting paths are unreachable.
 
 Everything lives in [MixTape/](MixTape/) (`SDKROOT = macosx`, `MACOSX_DEPLOYMENT_TARGET = 15.7`, `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, app-sandboxed). The Xcode target uses `PBXFileSystemSynchronizedRootGroup`, so files added to that directory are picked up automatically — **never edit [project.pbxproj](MixTape.xcodeproj/project.pbxproj) just to add sources.**
@@ -107,11 +113,30 @@ Three things keep it honest:
 
 Coverage is uneven *by design*, not broken: well-listened artists return 50–100 similar recordings, obscure ones return nothing. `ShowcaseSimilarError.noSimilarData` says so in plain language. Failures drop the tile rather than marking it `.failed`, because the detail sheet's Retry re-runs pass 2 against an LLM and this path never used one.
 
+### Metadata sync (two stages, one progress bar)
+
+[MetadataCache.swift](MixTape/MetadataCache.swift) is a `@MainActor @Observable` orchestrator (`phase`, `Stage.artists` / `Stage.recordings`) driving [SyncBanner.swift](MixTape/SyncBanner.swift). `runSync` does both stages back to back:
+
+1. **Artists** — every `ZSNRARTIST.ZNAME` not already in `mb_artist`, one MusicBrainz request each at 1 req/sec. `hasCompletedInitialSync` flips **here**, not at the end (see the gating chain above), because pass 1 only needs artist tags.
+2. **Recordings** — every distinct canonical `(artist, title)` from `allSongIdentities()` not already in `mb_recording`, batched 200 at a time to ListenBrainz.
+
+Both stages **diff against the cache first**, so a re-sync after the library grows only fetches the new rows, and stage 1 finding nothing to do still falls through to stage 2 — that's the path that back-fills recordings for a cache written before track lookups existed. Don't turn that `total == 0` case into an early return.
+
+The stages are wildly different in cost (one artist per second vs. 200 tracks per request), which is why they're separate `Stage` cases with their own counters rather than one merged total.
+
 ### Local cache
 
-The MusicBrainz metadata cache lives at `~/Library/Containers/studio.rischio.mixtape/Data/Library/Application Support/MixTape/metadata-cache.sqlite`. No entitlements needed — it's the app's own container. Owned by [MetadataCacheStore.swift](MixTape/MetadataCacheStore.swift); single table `mb_artist(canonical_name PK, name, mbid, disambiguation, type, country, tags-as-JSON, last_fetched_at)`.
+The metadata cache lives at `~/Library/Containers/studio.rischio.mixtape/Data/Library/Application Support/MixTape/metadata-cache.sqlite`. No entitlements needed — it's the app's own container. Owned by [MetadataCacheStore.swift](MixTape/MetadataCacheStore.swift), one flat table per sync stage:
 
-A failed or unmatched lookup is still cached (with `mbid: nil`) so a bad artist name isn't retried on every launch.
+- `mb_artist(canonical_name PK, name, mbid, disambiguation, type, country, tags-as-JSON, last_fetched_at)` — MusicBrainz genre tags, written by stage 1.
+- `mb_recording(canonical_artist + canonical_title PK, artist, title, recording_mbid, artist_mbid, release_mbid, release_name, listen_count, user_count, last_fetched_at)` — ListenBrainz identity + global listen counts, written by stage 2. Feeds the familiarity filter and "More like this".
+
+Two rules hold for both tables:
+
+- **A miss is still cached** — an `mb_artist` row with `mbid: nil`, an `mb_recording` row with `recording_mbid: nil` — so a name MusicBrainz/ListenBrainz can't match isn't re-asked on every launch.
+- **The diff keys on row presence**, so a row written with the *wrong* contents is never revisited short of a Reset Cache. That's why `syncRecordings` drops a whole batch when the popularity call fails rather than persisting rows with `listen_count NULL`; keep that shape for any new column that arrives in a second request.
+
+`mb_recording` is keyed on the canonical `(artist, title)` pair rather than `ZSNRSONG.Z_PK` so the cache survives a song being removed and re-added — Core Data hands the re-added row a new primary key, and an ID-keyed cache would re-fetch for nothing.
 
 ### LLM pipeline (two-pass)
 
@@ -177,6 +202,15 @@ The default of 45 keeps the original tuning exactly — `perArtistLimit` stays 1
 - Required: descriptive `User-Agent` header with a contactable URL. We use `MixTape/1.0 (+https://github.com/studio-rischio/MixTape)` — if the repo ever moves, update it, or MusicBrainz may start rejecting requests.
 - Score-only top-hit picking gives the wrong entity for ambiguous names (e.g., "Beck" the German voice actor outranks Beck the musician). The client compensates with a **musical-tag disambiguation pass**: walks the top 10 candidates and prefers the highest-scored one whose tags contain any of ~30 musical hint substrings. Only kicks in when the top hit lacks musical tags, so it's a no-op for unambiguous artists.
 
+### ListenBrainz quirks
+
+[ListenBrainzClient.swift](MixTape/ListenBrainzClient.swift) exists *because* of the MusicBrainz limits above: MusicBrainz is 1 req/sec and one entity per request, so per-track lookups on a 3,000-track library would take ~50 minutes. ListenBrainz exposes the same identity data through **batch POST endpoints with no API key and no rate limit** — the same job in a handful of requests. **Don't copy the `Task.sleep(for: .seconds(1))` over from `MusicBrainzClient`**; it isn't needed here and would make the sync 100× slower. (Same `User-Agent` though — MetaBrainz runs both.)
+
+- **Always take recording MBIDs from `acr-lookup`.** A song has many MusicBrainz recordings (album, single, remaster, live) and every ListenBrainz dataset is keyed on exactly one *canonical* one. A `/ws/2/recording?query=` search returns a different, equally valid MBID that comes back empty everywhere — verified on Radiohead's "Knives Out": search MBID → `total_listen_count: null`, canonical MBID → 1,250,106. The failure mode reads as "there is no data" rather than "you asked with the wrong ID".
+- **Misses are retried once with the title stripped** of trailing packaging parentheticals (`strippedTitle`), and the token lists are a minefield worth reading before editing. `performanceTokens` (live, remix, acoustic, demo, cover, …) **veto** the strip even when a packaging token is also present, because resolving "Song (Live)" to the studio take attaches the wrong listen counts and silently corrupts every familiarity result built on them. Matching is **whole-word, never substring** — "(Rising with the Tide)" contains "with", "(Mixtape Intro)" contains "mix".
+- Only tracks that both missed *and* have something to strip are retried, and the retry map is keyed by position in the retry array — map back to the original slice offsets.
+- `similarRecordings(to:)` is the odd one out: **GET with `recording_mbids` repeated per seed** (see "More like this" above), not a batch POST.
+
 ### Logging
 
 [Log.swift](MixTape/Log.swift) — `Log.{debug,info,warning,error}(_:category:)` callable from any isolation context (everything `nonisolated`). Mirrors to OSLog and appends to a capped `LogStore.shared`. Categories: `ui`, `library`, `doppler`, `llm`, `playlist`, `process`. The Debug Log window ([DebugLogView.swift](MixTape/DebugLogView.swift), ⌘⌥L) renders the store with filters.
@@ -184,8 +218,6 @@ The default of 45 keeps the original tuning exactly — `perArtistLimit` stays 1
 ### Theming
 
 [Theme.swift](MixTape/Theme.swift) is the single source of truth for the palette — derived from Doppler's icon (dark purple rgb 72/64/168, light purple rgb 108/90/204, lavender rgb 217/213/240) plus two container tones (`windowBackground` near-black with a faint purple cast, `panel` brighter so cards read as elevated). The accent color is wired through `Assets.xcassets/AccentColor.colorset` so SwiftUI controls inherit it for free.
-
-The app is forced dark (`.preferredColorScheme(.dark)` on every Scene root). The window background is painted via `.containerBackground(Theme.windowBackground, for: .window)` on the root of the main window and the Settings scene. Don't reach for `Color(nsColor: .controlBackgroundColor)` for new card surfaces — use `Theme.panel` + `Theme.panelBorder` so elevation stays consistent. Playlist tiles are the deliberate exception: they use a deterministic FNV-1a hash of the theme name to pick a multi-color gradient, so each tile feels distinct.
 
 ### .m3u export + Doppler bookmark format
 
