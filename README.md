@@ -8,7 +8,7 @@ Everything runs on your machine. Your library never leaves it — the only netwo
 
 > Built with heavy use of [Claude Code](https://claude.com/claude-code), Anthropic's AI coding assistant; contributed commits are tagged as such in the git history, and the brief it works from is checked into the repo as [CLAUDE.md](CLAUDE.md). Architecture, the model and context constraints, and what ships are human decisions, and since there is no automated test suite, every release is verified by hand against a real Doppler library.
 
-![The My Library tab, showing library stats and the MusicBrainz sync banner](images/app_window.png)
+![The My Library tab, showing library counts, recently added tracks and most played tracks](images/app_window.png)
 
 ---
 
@@ -62,7 +62,7 @@ The **Settings** window opens automatically the first time. Set up two things:
 1. **LLM tab** — confirm the LM Studio base URL (default `http://localhost:1234`), pick your loaded model from the list, and hit *Test Connection*.
 2. **Library tab** — *Choose Library…* and select your `Library.dopplerdb` bundle. It normally lives in `~/Library/Application Support/Doppler/`. The picker opens there for you, with hidden files shown so you can navigate into `~/Library`.
 
-![The Settings window](images/settings_window.png)
+![The Settings window, showing the LM Studio base URL, the loaded model and the parallel-request cap](images/settings_window.png)
 
 Then switch to **My Library**. The app immediately starts caching artist metadata from MusicBrainz. This takes roughly **1 second per artist** — MusicBrainz rate-limits anonymous users, and the app respects that. A 140-artist library takes a couple of minutes. It only happens once; the results are cached on disk.
 
