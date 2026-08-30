@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+
+# Xcode build output and per-user state.
+# build/ is this project's derived-data path (see build.sh) — it embeds absolute
+# /Users/<you>/ paths in build-request.json and the module cache, and
+# UserInterfaceState.xcuserstate does the same. Neither belongs in a public repo.
+build/
+DerivedData/
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+
+# Agent working notes — local scratch, deliberately never committed.
+agent_space/
+
+# Affinity Designer lock files, present while the document is open.
+*~lock~
