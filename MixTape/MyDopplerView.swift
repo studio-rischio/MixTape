@@ -116,7 +116,7 @@ struct MyDopplerView: View {
         VStack(alignment: .leading, spacing: 8) {
             Label(title, systemImage: systemImage)
                 .font(.headline)
-                .foregroundStyle(Theme.lavender)
+                .foregroundStyle(Theme.cream)
 
             if rows.isEmpty {
                 Text(emptyHint)
@@ -161,7 +161,7 @@ struct MyDopplerView: View {
         VStack(alignment: .leading, spacing: 8) {
             Label("Playlists", systemImage: "music.note.list")
                 .font(.headline)
-                .foregroundStyle(Theme.lavender)
+                .foregroundStyle(Theme.cream)
 
             if playlists.isEmpty {
                 Text("No playlists in your library yet.")
@@ -173,7 +173,7 @@ struct MyDopplerView: View {
                     ForEach(playlists) { p in
                         HStack {
                             Image(systemName: "music.note.list")
-                                .foregroundStyle(Theme.lightPurple)
+                                .foregroundStyle(Theme.amber)
                             Text(p.name)
                             Spacer()
                             Text("\(p.songCount) song\(p.songCount == 1 ? "" : "s")")
@@ -212,7 +212,7 @@ struct MyDopplerView: View {
     private func errorState(_ err: String) -> some View {
         ContentUnavailableView {
             Label("Couldn't read library", systemImage: "exclamationmark.triangle")
-                .foregroundStyle(.yellow)
+                .foregroundStyle(Theme.warning)
         } description: {
             Text(err)
         } actions: {

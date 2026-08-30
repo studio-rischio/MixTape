@@ -70,11 +70,11 @@ private struct LLMSettingsTab: View {
                         systemImage: "exclamationmark.triangle"
                     )
                     .font(.caption)
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(Theme.warning)
                 }
             } header: {
                 Label("LM Studio", systemImage: "brain")
-                    .foregroundStyle(Theme.lightPurple)
+                    .foregroundStyle(Theme.amber)
             } footer: {
                 Text("Run LM Studio locally and load a model. The default port is 1234.")
                     .font(.caption)
@@ -211,11 +211,11 @@ private struct LibrarySettingsTab: View {
                 if let err = pickError {
                     Label(err, systemImage: "exclamationmark.triangle")
                         .font(.caption)
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(Theme.warning)
                 }
             } header: {
                 Label("Doppler Library", systemImage: "music.note.house")
-                    .foregroundStyle(Theme.lightPurple)
+                    .foregroundStyle(Theme.amber)
             } footer: {
                 Text("Pick the Library.dopplerdb bundle, normally in ~/Library/Application Support/Doppler/.")
                     .font(.caption)
@@ -247,7 +247,7 @@ private struct LibrarySettingsTab: View {
                 }
             } header: {
                 Label("Playlist Save Folder", systemImage: "square.and.arrow.down")
-                    .foregroundStyle(Theme.lightPurple)
+                    .foregroundStyle(Theme.amber)
             } footer: {
                 Text("Where the Save button writes .m3u files. Track paths are written relative to your Doppler watched folder, so saving inside it keeps them playable. Files are never overwritten — a repeated name gets a number.")
                     .font(.caption)
@@ -281,7 +281,7 @@ private struct LibrarySettingsTab: View {
                 .disabled(metadataCache.cachedArtistCount == 0 && !metadataCache.hasCompletedInitialSync)
             } header: {
                 Label("MusicBrainz Cache", systemImage: "tray.full")
-                    .foregroundStyle(Theme.lightPurple)
+                    .foregroundStyle(Theme.amber)
             } footer: {
                 Text("Clears cached artist and track metadata and re-runs lookups. Useful after fixing a misspelled artist or improving disambiguation. Artist lookups are rate-limited to one per second; track lookups are batched and take seconds.")
                     .font(.caption)

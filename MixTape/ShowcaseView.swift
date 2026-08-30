@@ -239,7 +239,7 @@ struct ShowcaseView: View {
         case .failed(let msg) where generator.discoverEntries.isEmpty:
             ContentUnavailableView {
                 Label("Generation failed", systemImage: "exclamationmark.triangle")
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(Theme.warning)
             } description: {
                 Text(msg)
             } actions: {
@@ -340,7 +340,7 @@ struct ShowcaseTile: View {
         case .failed:
             Label("Failed", systemImage: "exclamationmark.triangle.fill")
                 .font(.caption2)
-                .foregroundStyle(.orange)
+                .foregroundStyle(Theme.warning)
         }
     }
 
@@ -497,7 +497,7 @@ struct ShowcaseDetailSheet: View {
         case .failed(let msg):
             ContentUnavailableView {
                 Label("Couldn't pick tracks", systemImage: "exclamationmark.triangle")
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(Theme.warning)
             } description: {
                 Text(msg)
             } actions: {
@@ -529,12 +529,12 @@ struct ShowcaseDetailSheet: View {
                             .foregroundStyle(.secondary)
                             .frame(width: 24, alignment: .trailing)
                         Image(systemName: track.dopplerSongID != nil ? "music.note" : "questionmark.circle")
-                            .foregroundStyle(track.dopplerSongID != nil ? Color.secondary : Color.orange)
+                            .foregroundStyle(track.dopplerSongID != nil ? Color.secondary : Theme.warning)
                             .font(.caption)
                             .frame(width: 14)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(track.title)
-                                .strikethrough(track.dopplerSongID == nil, color: .orange)
+                                .strikethrough(track.dopplerSongID == nil, color: Theme.warning)
                                 .lineLimit(1)
                             Text(track.artist)
                                 .font(.caption)
@@ -567,7 +567,7 @@ struct ShowcaseDetailSheet: View {
                     if missing > 0 {
                         Text("\(missing) track\(missing == 1 ? "" : "s") will be skipped on add")
                             .font(.caption2)
-                            .foregroundStyle(.orange)
+                            .foregroundStyle(Theme.warning)
                     }
                     // In ID mode a track can't fail to resolve, so there's nothing to
                     // strike through — the model either picked a valid number or it
@@ -576,7 +576,7 @@ struct ShowcaseDetailSheet: View {
                     if entry.unusablePicks > 0 {
                         Text("\(entry.unusablePicks) unusable pick\(entry.unusablePicks == 1 ? "" : "s") discarded — see Debug Log")
                             .font(.caption2)
-                            .foregroundStyle(.orange)
+                            .foregroundStyle(Theme.warning)
                     }
                     if let savedURL {
                         Button {

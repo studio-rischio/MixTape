@@ -217,7 +217,14 @@ The default of 45 keeps the original tuning exactly — `perArtistLimit` stays 1
 
 ### Theming
 
-[Theme.swift](MixTape/Theme.swift) is the single source of truth for the palette — derived from Doppler's icon (dark purple rgb 72/64/168, light purple rgb 108/90/204, lavender rgb 217/213/240) plus two container tones (`windowBackground` near-black with a faint purple cast, `panel` brighter so cards read as elevated). The accent color is wired through `Assets.xcassets/AccentColor.colorset` so SwiftUI controls inherit it for free.
+[Theme.swift](MixTape/Theme.swift) is the single source of truth for the palette — **sampled from the MixTape icon**, not invented: `amber` 251/172/23 and `gold` 232/182/81 (ground + shading), `sky` 24/195/251 (ears), `cream` 243/236/218 (face), `navy` 8/22/47 (outlines), `warning` 219/104/82 (antenna coral). Plus two container tones darkened out of `navy` — `windowBackground` near-black, `panel` lifted off it by 1.31:1 so cards read as elevated. Re-sample from [RobotFace.svg](MixTape/MixTape.icon/Assets/RobotFace.svg) (plain `rgb()` fills) and [icon.json](MixTape/MixTape.icon/icon.json) (`fill.solid`, **Display P3** — convert before use) if the artwork is redrawn. The palette replaced a Doppler-derived purple one when the app was renamed; nothing in the app should reference Doppler's brand colors any more.
+
+Two rules the palette is built around, both easy to undo by accident:
+
+- **The accent is `deepSky` (14/127/196), not `amber` or `sky`.** It's `sky` darkened until white text clears 4.3:1. The icon's own amber and sky are light — white on either is ~1.9:1 — and the app has six `.borderedProminent` buttons whose labels macOS paints white regardless. Amber carries the brand as *foreground* on dark panels (8:1+); it must never become a fill behind white text. The value is mirrored in `Assets.xcassets/AccentColor.colorset` so SwiftUI controls inherit it for free — **change both or neither.**
+- **User-facing warnings use `Theme.warning`, never `.orange`.** System orange now sits a few degrees from `amber`, so a failure chip rendered in it reads as ordinary brand chrome. The one deliberate exception is [DebugLogView.swift](MixTape/DebugLogView.swift)'s level ramp, which keeps conventional orange/red because it's a developer tool, not a brand surface. Success states keep the system `.green`.
+
+The app is forced dark (`.preferredColorScheme(.dark)` on every Scene root). The window background is painted via `.containerBackground(Theme.windowBackground, for: .window)` on the root of the main window and the Settings scene. Don't reach for `Color(nsColor: .controlBackgroundColor)` for new card surfaces — use `Theme.panel` + `Theme.panelBorder` so elevation stays consistent. Playlist tiles are the deliberate exception: they use a deterministic FNV-1a hash of the theme name to pick a multi-color gradient, so each tile feels distinct.
 
 ### .m3u export + Doppler bookmark format
 

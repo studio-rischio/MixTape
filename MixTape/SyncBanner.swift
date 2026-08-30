@@ -59,8 +59,8 @@ struct SyncBanner: View {
 
     private var iconColor: Color {
         switch phase {
-        case .syncing: Theme.lightPurple
-        case .failed: .orange
+        case .syncing: Theme.amber
+        case .failed: Theme.warning
         case .cancelled: .secondary
         case .idle, .completed: .green
         }
@@ -98,9 +98,9 @@ struct SyncBanner: View {
 
     private var borderColor: Color {
         switch phase {
-        case .syncing: Theme.lightPurple.opacity(0.45)
-        case .failed: .orange.opacity(0.5)
-        case .cancelled: Theme.lavender.opacity(0.25)
+        case .syncing: Theme.amber.opacity(0.45)
+        case .failed: Theme.warning.opacity(0.5)
+        case .cancelled: Theme.cream.opacity(0.25)
         case .idle, .completed: Theme.panelBorder
         }
     }

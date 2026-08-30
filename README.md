@@ -163,7 +163,7 @@ Build settings worth knowing: `MACOSX_DEPLOYMENT_TARGET = 15.7`, `SWIFT_DEFAULT_
 - **LLM** — [LMStudioClient.swift](MixTape/LMStudioClient.swift), an OpenAI-compatible `/v1/chat/completions` client using `json_schema` response format.
 - **Settings** — [AppSettings.swift](MixTape/AppSettings.swift), an `@Observable` singleton backed by UserDefaults.
 - **Logging** — [Log.swift](MixTape/Log.swift) + [DebugLogView.swift](MixTape/DebugLogView.swift).
-- **Theme** — [Theme.swift](MixTape/Theme.swift), the single source of truth for the Doppler-derived purple palette.
+- **Theme** — [Theme.swift](MixTape/Theme.swift), the single source of truth for the palette, sampled from the app icon.
 - **Views** — [ContentView.swift](MixTape/ContentView.swift) (tab shell), [MyDopplerView.swift](MixTape/MyDopplerView.swift), [ShowcaseView.swift](MixTape/ShowcaseView.swift), [CreateView.swift](MixTape/CreateView.swift), [SettingsView.swift](MixTape/SettingsView.swift), [SyncBanner.swift](MixTape/SyncBanner.swift).
 
 > The **Discover** tab is called `Showcase` throughout the code (`ShowcaseView`, `ShowcaseGenerator`, `ShowcaseEntry`, `Tab.showcase`) — the original name, kept to avoid churn. **Create** lives in `CreateView` and shares `ShowcaseGenerator`.

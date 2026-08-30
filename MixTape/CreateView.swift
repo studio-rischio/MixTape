@@ -98,7 +98,7 @@ struct CreateView: View {
                     Text("Create").font(.title2.bold())
                     Text(statusText)
                         .font(.caption)
-                        .foregroundStyle(statusIsError ? .orange : .secondary)
+                        .foregroundStyle(statusIsError ? Theme.warning : .secondary)
                         .lineLimit(2)
                 }
                 Spacer()
@@ -116,7 +116,7 @@ struct CreateView: View {
             // closed can't switch to the mode that doesn't need it.
             if mode == .describe && !settings.isLLMConfigured {
                 HStack(spacing: 10) {
-                    Image(systemName: "lock.fill").foregroundStyle(.orange)
+                    Image(systemName: "lock.fill").foregroundStyle(Theme.warning)
                     Text("Describing a playlist needs a model. Pick one in Settings, or switch to “More like this” — it doesn't use the LLM.")
                         .font(.callout)
                         .foregroundStyle(.secondary)
@@ -234,7 +234,7 @@ struct CreateView: View {
                             } label: {
                                 HStack(spacing: 8) {
                                     Image(systemName: "sparkle.magnifyingglass")
-                                        .foregroundStyle(Theme.lightPurple)
+                                        .foregroundStyle(Theme.amber)
                                     VStack(alignment: .leading, spacing: 1) {
                                         Text(song.title).lineLimit(1)
                                         Text(song.artist ?? "Unknown artist")
