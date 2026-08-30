@@ -19,8 +19,8 @@ import SwiftUI
 ///   white text: it's a light color, and white on it is ~1.9:1.
 /// - `gold`   rgb(232, 182, 81)  — the muted amber in the icon's shading. A
 ///   second warm tone for places that need two distinct highlights.
-/// - `sky`    rgb(24, 195, 251)  — the robot's ears. The cool counterweight.
-/// - `deepSky` rgb(14, 127, 196) — `sky` darkened until white text clears 4.3:1.
+/// - `sky`    rgb(29, 160, 204)  — the robot's ears. The cool counterweight.
+/// - `deepSky` rgb(22, 120, 153) — `sky` darkened 25% until white text clears 5:1.
 ///   **This is the accent color**, mirrored in
 ///   `Assets.xcassets/AccentColor.colorset` so buttons, toggles, pickers and
 ///   `.tint`-receiving controls inherit it for free. It exists because neither
@@ -49,13 +49,13 @@ import SwiftUI
 ///   that picks up the palette without being noisy.
 ///
 /// `statTints` is warm→cool across the two brand families, used by the four
-/// `StatTile`s on My Doppler so each stat reads as distinct without breaking
+/// `StatTile`s on My Library so each stat reads as distinct without breaking
 /// the palette.
 enum Theme {
     static let amber   = Color(.sRGB, red: 251/255, green: 172/255, blue: 23/255,  opacity: 1)
     static let gold    = Color(.sRGB, red: 232/255, green: 182/255, blue: 81/255,  opacity: 1)
-    static let sky     = Color(.sRGB, red: 24/255,  green: 195/255, blue: 251/255, opacity: 1)
-    static let deepSky = Color(.sRGB, red: 14/255,  green: 127/255, blue: 196/255, opacity: 1)
+    static let sky     = Color(.sRGB, red: 29/255,  green: 160/255, blue: 204/255, opacity: 1)
+    static let deepSky = Color(.sRGB, red: 22/255,  green: 120/255, blue: 153/255, opacity: 1)
     static let cream   = Color(.sRGB, red: 243/255, green: 236/255, blue: 218/255, opacity: 1)
     static let navy    = Color(.sRGB, red: 8/255,   green: 22/255,  blue: 47/255,  opacity: 1)
 
@@ -68,11 +68,12 @@ enum Theme {
     /// Distinct tints for the four stat tiles (Songs / Artists / Albums /
     /// Playlists). Runs warm → cool so the row reads as one deliberate palette
     /// rather than four unrelated colors. The pale sky at the end is `sky`
-    /// lightened; it's the only value here not lifted straight from the icon.
+    /// mixed 45% toward white; it's the only value here not lifted straight
+    /// from the icon.
     static let statTints: [Color] = [
         amber,
         gold,
         sky,
-        Color(.sRGB, red: 134/255, green: 220/255, blue: 253/255, opacity: 1)
+        Color(.sRGB, red: 130/255, green: 203/255, blue: 227/255, opacity: 1)
     ]
 }

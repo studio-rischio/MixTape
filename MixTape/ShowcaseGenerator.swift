@@ -121,7 +121,7 @@ enum ShowcaseSimilarError: LocalizedError {
         case .seedNotFound:
             return "That track is no longer in your library."
         case .seedNotMatched(let title):
-            return "“\(title)” hasn't been matched to MusicBrainz yet, so there's nothing to compare it against. Let the track sync finish on My Doppler and try again."
+            return "“\(title)” hasn't been matched to MusicBrainz yet, so there's nothing to compare it against. Let the track sync finish on My Library and try again."
         case .noSimilarData(let title):
             return "ListenBrainz has no listening data for “\(title)”, or nothing similar to it is in your library. This is common for lesser-known artists — try a more widely played track."
         }
@@ -143,7 +143,7 @@ enum ShowcaseError: LocalizedError {
         case .notConfigured:
             return "LM Studio isn't configured. Open Settings (⌘,) and pick a model."
         case .noArtistsCached:
-            return "No artists in the metadata cache yet. Run a sync from My Doppler first."
+            return "No artists in the metadata cache yet. Run a sync from My Library first."
         case .invalidResponse(let m):
             return "LM Studio returned a response we couldn't parse: \(m)"
         case .noUsableThemes:
@@ -257,7 +257,7 @@ final class ShowcaseGenerator {
 
     /// Writes the entry's playlist into Doppler. Throws `DopplerLibraryWriter.WriteError`
     /// on failure (most commonly `dopplerRunning`). On success, marks the entry as added
-    /// and bumps `AppSettings.libraryRevision` so observers (My Doppler) re-fetch.
+    /// and bumps `AppSettings.libraryRevision` so observers (My Library) re-fetch.
     func addToDoppler(entryID: UUID) async throws -> Int64 {
         Log.info("user tapped Add to Doppler", category: LogCategory.ui)
         guard let url = AppSettings.shared.libraryURL else {

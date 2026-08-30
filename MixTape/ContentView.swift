@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The main window's root view. A three-tab `TabView` shell — "My Doppler"
+/// The main window's root view. A three-tab `TabView` shell — "My Library"
 /// (read-only dashboard onto the user's library), "Discover" (themes the LLM
 /// invents from the library) and "Create" (one playlist from a brief the user
 /// types). Tab content lives in `MyDopplerView`, `ShowcaseView` and `CreateView`.
@@ -8,21 +8,24 @@ import SwiftUI
 /// Also implements the **first-run gate**: when the window first appears, if the
 /// LLM provider isn't configured we programmatically open the Settings scene so
 /// the user has somewhere to start. Library selection is handled inside Settings,
-/// not gated here, because the My Doppler tab has its own no-library empty state.
+/// not gated here, because the My Library tab has its own no-library empty state.
 struct ContentView: View {
     @State private var settings = AppSettings.shared
     @State private var selectedTab: Tab = .myDoppler
     @Environment(\.openSettings) private var openSettings
 
-    /// Tab identity for the `TabView` selection binding. The `showcase` case name
-    /// pre-dates the user-visible "Discover" label — the code-side identifier
-    /// stays put to avoid churn, as does `ShowcaseView`/`ShowcaseGenerator`.
+    /// Tab identity for the `TabView` selection binding. **Two of these three
+    /// case names pre-date their user-visible labels and deliberately stay put:**
+    /// `showcase` is labelled "Discover" (as are `ShowcaseView`/`ShowcaseGenerator`),
+    /// and `myDoppler` is labelled "My Library" (as is `MyDopplerView`). The tab
+    /// reads one library today and that library is Doppler's; the label is generic
+    /// because the screen isn't about Doppler, it's about the user's music.
     enum Tab: Hashable { case myDoppler, showcase, create }
 
     var body: some View {
         TabView(selection: $selectedTab) {
             MyDopplerView()
-                .tabItem { Label("My Doppler", systemImage: "music.note.list") }
+                .tabItem { Label("My Library", systemImage: "music.note.list") }
                 .tag(Tab.myDoppler)
 
             ShowcaseView()

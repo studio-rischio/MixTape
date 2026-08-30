@@ -70,7 +70,7 @@ struct CreateView: View {
                 ContentUnavailableView {
                     Label("Building your library context", systemImage: "hourglass")
                 } description: {
-                    Text("Creating playlists unlocks once the initial MusicBrainz sync finishes. Check the banner on My Doppler.")
+                    Text("Creating playlists unlocks once the initial MusicBrainz sync finishes. Check the banner on My Library.")
                         .multilineTextAlignment(.center)
                 }
             } else {

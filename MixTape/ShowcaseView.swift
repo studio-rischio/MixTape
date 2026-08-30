@@ -10,7 +10,7 @@ import UniformTypeIdentifiers
 /// 3. MusicBrainz cache initial sync complete?
 ///
 /// If any gate fails we render a `ContentUnavailableView` that points the user
-/// at the right place to fix it (Settings or My Doppler).
+/// at the right place to fix it (Settings or My Library).
 ///
 /// When all gates pass, the body shows a header (title + subtitle + theme-count
 /// stepper + Generate button) over a `LazyVGrid` of `ShowcaseTile`s. Tapping a
@@ -94,11 +94,11 @@ struct ShowcaseView: View {
             // where the flag was cleared by a cache reset mid-run.
             return "Matching your tracks to MusicBrainz (\(processed)/\(total)). Playlists unlock when this finishes."
         case .failed(let msg):
-            return "MusicBrainz lookup failed: \(msg)\nPlaylists will unlock once the cache completes — try refreshing My Doppler."
+            return "MusicBrainz lookup failed: \(msg)\nPlaylists will unlock once the cache completes — try refreshing My Library."
         case .cancelled:
-            return "Cache build was cancelled. Refresh My Doppler to resume."
+            return "Cache build was cancelled. Refresh My Library to resume."
         case .idle, .completed:
-            return "Switch to the My Doppler tab to start the initial cache build."
+            return "Switch to the My Library tab to start the initial cache build."
         }
     }
 

@@ -16,7 +16,7 @@ struct Song: Identifiable, Hashable, Sendable {
     let artist: String?
 }
 
-/// A song with display-friendly metadata used by the My Doppler stat panels and
+/// A song with display-friendly metadata used by the My Library stat panels and
 /// by Showcase track resolution (`findSong(title:artist:)`). `dateAdded` is the
 /// converted-to-Swift `ZSNRSONG.ZDATEADDED` (Core Data reference date — see
 /// `coreDataDate` below). `playCount` is only populated by `mostPlayedSongs`.
@@ -81,7 +81,7 @@ struct SongLocation: Sendable, Hashable {
     }
 }
 
-/// Library-wide counts shown as the four stat tiles at the top of My Doppler.
+/// Library-wide counts shown as the four stat tiles at the top of My Library.
 /// `zero` is the placeholder used while the first query is in flight.
 struct LibraryCounts: Hashable, Sendable {
     let songs: Int
@@ -191,7 +191,7 @@ actor DopplerLibrary {
     }
 
     /// Returns every playlist in the library with its track count. Sorted alphabetically
-    /// using `COLLATE NOCASE`. Backs both the My Doppler "Playlists" panel and the
+    /// using `COLLATE NOCASE`. Backs both the My Library "Playlists" panel and the
     /// `mostPlayedSongs` UI's playlist count.
     func listPlaylists() throws -> [Playlist] {
         let db = try requireOpen()
@@ -270,7 +270,7 @@ actor DopplerLibrary {
     }
 
     /// Single-statement aggregate of all four counts (songs/artists/albums/playlists).
-    /// Cheap — runs in well under 1 ms on a typical library. Powers the My Doppler
+    /// Cheap — runs in well under 1 ms on a typical library. Powers the My Library
     /// stat tiles row.
     func libraryCounts() throws -> LibraryCounts {
         let db = try requireOpen()
@@ -307,7 +307,7 @@ actor DopplerLibrary {
 
     /// Most recently added songs (by `ZDATEADDED DESC`), up to `limit`. Excludes
     /// rows where Doppler has flagged the file as missing. Joins `ZSNRALBUM` for
-    /// the album name. Powers the My Doppler "Recently Added" panel.
+    /// the album name. Powers the My Library "Recently Added" panel.
     func recentlyAddedSongs(limit: Int = 10) throws -> [SongRow] {
         let db = try requireOpen()
         let started = Date()
@@ -546,7 +546,7 @@ actor DopplerLibrary {
 
     /// Top-N songs by play count, computed by `COUNT(*) GROUP BY ZSONG` against
     /// `ZSONGPLAYHISTORY` (which is an event log, one row per play). Powers the
-    /// My Doppler "Most Played" panel. Sparse for users who haven't been on Doppler
+    /// My Library "Most Played" panel. Sparse for users who haven't been on Doppler
     /// long — we surface a friendly empty hint in that case.
     func mostPlayedSongs(limit: Int = 10) throws -> [SongRow] {
         let db = try requireOpen()

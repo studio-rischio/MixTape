@@ -272,7 +272,7 @@ struct MyDopplerView: View {
     }()
 }
 
-/// One of the four big number+label cards at the top of My Doppler.
+/// One of the four big number+label cards at the top of My Library.
 /// `tint` colors the icon glyph and the uppercase label so each stat reads
 /// as distinct; the number itself stays in the primary text color so glance
 /// readability isn't lost. Background uses the shared `Theme.panel` so the

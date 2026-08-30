@@ -8,13 +8,18 @@ A macOS SwiftUI app that uses a local LLM ([LM Studio](https://lmstudio.ai)) to 
 
 User-visible shape:
 
-- **My Doppler** tab — library stats, recently added, most played, existing playlists, sync banner.
+- **My Library** tab — library stats, recently added, most played, existing playlists, sync banner.
 - **Discover** tab — grid of LLM-generated playlists whose themes the model invented from the library. Each tile opens a detail sheet with the tracklist plus **Add to Doppler** (writeback), **Save .m3u** (one click into a remembered folder, with **Export .m3u…** and the folder controls in its menu), and a per-tile **Retry** when an individual playlist fails.
 - **Create** tab — two modes behind a segmented picker. *Describe* takes a typed brief ("Italian dinner night") and runs the same two-pass pipeline. *More like this* takes a seed track and builds a playlist by collaborative filtering, **with no LLM call at all** — so it stays usable with LM Studio closed, and its LLM gate is rendered inline rather than replacing the screen (otherwise the mode picker itself becomes unreachable).
 - **Settings (⌘,)** — LLM provider, library picker, .m3u save folder, cache management.
 - **Debug Log (⌘⌥L)** — in-app log viewer.
 
-The Discover tab is named `Showcase` throughout the code (`ShowcaseView`, `ShowcaseGenerator`, `ShowcaseEntry`, the `Tab.showcase` case). That's the original name, deliberately kept — don't rename it as a drive-by. The user-visible label has been "Playlists" and is now "Discover"; the code name has never moved.
+**Two tabs have code names that don't match their labels, and both are deliberate — don't rename either as a drive-by.**
+
+- Discover is `Showcase` throughout the code (`ShowcaseView`, `ShowcaseGenerator`, `ShowcaseEntry`, `Tab.showcase`). The label has been "Playlists" and is now "Discover"; the code name has never moved.
+- My Library is `MyDopplerView` / `Tab.myDoppler`. The label moved off "My Doppler" because the screen is about the user's music, not about Doppler — and because Doppler being the only supported library is a fact about today, not about the design. The code name still says Doppler because that's still literally what it reads.
+
+The rule for both: **user-visible strings track the label, code identifiers don't.** A string a user can read should say "My Library"; a symbol, a filename or a reference to the type keeps its name.
 
 **Discover and Create share one `entries` array** on `ShowcaseGenerator`, tagged by `ShowcaseEntry.source` (`.discover` / `.created`). That's deliberate: `addToDoppler`, `exportM3U` and `retryEntry` all look an entry up by UUID, so both tabs get them for free. The tabs filter via `discoverEntries` / `createdEntries`. Two consequences to preserve — `generate()` must only clear `.discover` entries (a Regenerate shouldn't destroy the user's Create results), and Create runs on its own `createPhase`/`createTask` so the two tabs don't fight over `phase`.
 
@@ -217,11 +222,11 @@ The default of 45 keeps the original tuning exactly — `perArtistLimit` stays 1
 
 ### Theming
 
-[Theme.swift](MixTape/Theme.swift) is the single source of truth for the palette — **sampled from the MixTape icon**, not invented: `amber` 251/172/23 and `gold` 232/182/81 (ground + shading), `sky` 24/195/251 (ears), `cream` 243/236/218 (face), `navy` 8/22/47 (outlines), `warning` 219/104/82 (antenna coral). Plus two container tones darkened out of `navy` — `windowBackground` near-black, `panel` lifted off it by 1.31:1 so cards read as elevated. Re-sample from [RobotFace.svg](MixTape/MixTape.icon/Assets/RobotFace.svg) (plain `rgb()` fills) and [icon.json](MixTape/MixTape.icon/icon.json) (`fill.solid`, **Display P3** — convert before use) if the artwork is redrawn. The palette replaced a Doppler-derived purple one when the app was renamed; nothing in the app should reference Doppler's brand colors any more.
+[Theme.swift](MixTape/Theme.swift) is the single source of truth for the palette — **sampled from the MixTape icon**, not invented: `amber` 251/172/23 and `gold` 232/182/81 (ground + shading), `sky` 29/160/204 (ears), `cream` 243/236/218 (face), `navy` 8/22/47 (outlines), `warning` 219/104/82 (antenna coral). Plus two container tones darkened out of `navy` — `windowBackground` near-black, `panel` lifted off it by 1.31:1 so cards read as elevated. Re-sample from [RobotFace.svg](MixTape/MixTape.icon/Assets/RobotFace.svg) (plain `rgb()` fills) and [icon.json](MixTape/MixTape.icon/icon.json) (`fill.solid`, **Display P3** — convert before use) if the artwork is redrawn. The palette replaced a Doppler-derived purple one when the app was renamed; nothing in the app should reference Doppler's brand colors any more.
 
 Two rules the palette is built around, both easy to undo by accident:
 
-- **The accent is `deepSky` (14/127/196), not `amber` or `sky`.** It's `sky` darkened until white text clears 4.3:1. The icon's own amber and sky are light — white on either is ~1.9:1 — and the app has six `.borderedProminent` buttons whose labels macOS paints white regardless. Amber carries the brand as *foreground* on dark panels (8:1+); it must never become a fill behind white text. The value is mirrored in `Assets.xcassets/AccentColor.colorset` so SwiftUI controls inherit it for free — **change both or neither.**
+- **The accent is `deepSky` (22/120/153), not `amber` or `sky`.** It's `sky` darkened 25% until white text clears 5:1. The icon's own amber and sky are light — white on them is 1.9:1 and 3.0:1 — and the app has six `.borderedProminent` buttons whose labels macOS paints white regardless. Amber carries the brand as *foreground* on dark panels (8:1+); it must never become a fill behind white text. The value is mirrored in `Assets.xcassets/AccentColor.colorset` so SwiftUI controls inherit it for free — **change both or neither.**
 - **User-facing warnings use `Theme.warning`, never `.orange`.** System orange now sits a few degrees from `amber`, so a failure chip rendered in it reads as ordinary brand chrome. The one deliberate exception is [DebugLogView.swift](MixTape/DebugLogView.swift)'s level ramp, which keeps conventional orange/red because it's a developer tool, not a brand surface. Success states keep the system `.green`.
 
 The app is forced dark (`.preferredColorScheme(.dark)` on every Scene root). The window background is painted via `.containerBackground(Theme.windowBackground, for: .window)` on the root of the main window and the Settings scene. Don't reach for `Color(nsColor: .controlBackgroundColor)` for new card surfaces — use `Theme.panel` + `Theme.panelBorder` so elevation stays consistent. Playlist tiles are the deliberate exception: they use a deterministic FNV-1a hash of the theme name to pick a multi-color gradient, so each tile feels distinct.

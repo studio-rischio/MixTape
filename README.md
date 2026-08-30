@@ -8,7 +8,7 @@ Everything runs on your machine. Your library never leaves it — the only netwo
 
 > Built with heavy use of [Claude Code](https://claude.com/claude-code), Anthropic's AI coding assistant; contributed commits are tagged as such in the git history, and the brief it works from is checked into the repo as [CLAUDE.md](CLAUDE.md). Architecture, the model and context constraints, and what ships are human decisions, and since there is no automated test suite, every release is verified by hand against a real Doppler library.
 
-![The My Doppler tab, showing library stats and the MusicBrainz sync banner](images/app_window.png)
+![The My Library tab, showing library stats and the MusicBrainz sync banner](images/app_window.png)
 
 ---
 
@@ -64,7 +64,7 @@ The **Settings** window opens automatically the first time. Set up two things:
 
 ![The Settings window](images/settings_window.png)
 
-Then switch to **My Doppler**. The app immediately starts caching artist metadata from MusicBrainz. This takes roughly **1 second per artist** — MusicBrainz rate-limits anonymous users, and the app respects that. A 140-artist library takes a couple of minutes. It only happens once; the results are cached on disk.
+Then switch to **My Library**. The app immediately starts caching artist metadata from MusicBrainz. This takes roughly **1 second per artist** — MusicBrainz rate-limits anonymous users, and the app respects that. A 140-artist library takes a couple of minutes. It only happens once; the results are cached on disk.
 
 The **Discover** and **Create** tabs unlock when that finishes.
 
@@ -112,7 +112,7 @@ This uses real listening data from [ListenBrainz](https://listenbrainz.org) rath
 
 | Symptom | Cause |
 | --- | --- |
-| Discover and Create are locked | The MusicBrainz sync hasn't finished. Check the banner on **My Doppler**. |
+| Discover and Create are locked | The MusicBrainz sync hasn't finished. Check the banner on **My Library**. |
 | Generation fails immediately | LM Studio isn't running, or no model is loaded. Re-run *Test Connection* in Settings. |
 | Every playlist fails, or output is empty | Model context is too small. Raise it to 8 K+ in LM Studio and regenerate. |
 | *"LM Studio ran out of context"* partway through | Too many playlists being generated at once for your model's context. Lower **Parallel requests** in *Settings → LLM* (default 3), or raise the model's context length. |
@@ -122,7 +122,7 @@ This uses real listening data from [ListenBrainz](https://listenbrainz.org) rath
 
 ## Windows and shortcuts
 
-- **My Doppler** — library stats, recently added, most played, your existing playlists, sync banner.
+- **My Library** — library stats, recently added, most played, your existing playlists, sync banner.
 - **Discover** — playlist themes the model came up with from your library.
 - **Create** — type a description, or pick a track and get more like it.
 - **Settings** — ⌘, — LLM config and parallel-request cap, library picker, `.m3u` save folder, cache stats and reset.

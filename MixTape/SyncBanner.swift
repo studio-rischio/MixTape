@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Banner card for the metadata-cache sync phase. Lives at the top of My Doppler
+/// Banner card for the metadata-cache sync phase. Lives at the top of My Library
 /// while MusicBrainz lookups are running, failed, or cancelled. Hidden in the
 /// idle/completed cases.
 ///
