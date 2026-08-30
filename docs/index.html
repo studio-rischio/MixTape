@@ -552,9 +552,15 @@
         <li><strong><a href="https://lmstudio.ai">LM Studio</a></strong> running locally with a chat model loaded, its context length set to <strong>8K or more</strong> — 16K recommended. The per-theme prompts carry your real song titles and won't fit in a 4K window. It's the only supported provider today; <a href="#roadmap">others are planned</a>.</li>
       </ul>
       <p class="tested">
-        <strong>Tested with qwen3.6-27b on an M3 Ultra.</strong> Other models and Apple Silicon
-        Macs should work; that's simply the combination the app was developed and measured
-        against, so it's the one known to behave.
+        <strong>Developed and measured against qwen/qwen3.6-27b on a Mac Studio M3 Ultra.</strong>
+        That's a lot of unified memory, and the defaults assume it. Your Mac decides how large a
+        model you can load and how much context you can give it, and that context decides how many
+        tracks a playlist can hold and how many playlists can generate at once — so on a smaller
+        Mac, or with a smaller model, expect to turn those settings down rather than to see them
+        work unchanged. The app ships the controls for exactly that: parallel requests, tracks per
+        playlist, and playlists per run are all adjustable, and the
+        <a href="https://github.com/studio-rischio/MixTape#about-your-mac-and-your-model">README</a>
+        says which to reach for first.
       </p>
     </div>
   </section>

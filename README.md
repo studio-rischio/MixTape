@@ -29,9 +29,24 @@ A generated playlist, after **Add to Doppler**, sitting in Doppler's own sidebar
 
 - **macOS 15.7 or later** (Apple Silicon)
 - **[Doppler for macOS](https://brushedtype.co/doppler/)** installed, with at least one song in its library
-- **[LM Studio](https://lmstudio.ai)** running locally with a chat model loaded. Tested with **qwen3.6-27b on an M3 Ultra** — other models and Apple Silicon Macs should be fine, that's simply the combination it was developed and measured against.
+- **[LM Studio](https://lmstudio.ai)** running locally with a chat model loaded.
   - **Set the model's context length to ≥ 8 K** (16 K recommended). The per-theme prompts include your real song titles and won't fit in a 4 K window.
 - **Xcode 26 or later**, but only if you're [building from source](#building-from-source) rather than using the download. The project uses an Icon Composer app icon and Xcode 26 build settings, so earlier versions won't open it. Xcode 26 itself runs on macOS 15.6+, so you don't need to upgrade past Sequoia to build.
+
+### About your Mac and your model
+
+MixTape was developed and measured against **qwen/qwen3.6-27b on a Mac Studio M3 Ultra**. That is a lot of unified memory, and the defaults are tuned for it. **On a smaller Mac, or with a smaller model, the defaults may not hold** — this isn't a bug you should work around silently, it's a limit you can dial in.
+
+The chain is short: your Mac's memory decides how large a model you can load *and* how much context you can give it, and that context decides how many tracks a playlist can hold and how many playlists can generate at once. Prompt size also grows with your library — pass one ships every artist, and pass two ships real song titles for the artists in each theme.
+
+You'll know you've hit the ceiling when playlists fail in batches, come back empty, or the log shows *"Context size has been exceeded"*. Turn these down in *Settings → LLM*, roughly in this order:
+
+1. **Parallel requests** (default 3 → try 1). Each in-flight request reserves its own prompt plus room to answer, so this is the biggest single lever, and the usual cause of a whole batch failing at once.
+2. **The model's context length** in LM Studio — raise it if you have the memory to spare.
+3. **Tracks per playlist** (default 45 → try 25–30). Fewer tracks means fewer candidate songs in the prompt, not just a shorter answer.
+4. **Playlists per run**, and finally a smaller or more heavily quantized model.
+
+Leave **Pick tracks by number** on (the default). The model answers with numbers into a list of your songs rather than retyping titles, which costs roughly an eighteenth of the generated tokens — on a tight budget it's the difference between finishing and running out.
 
 ## Installing
 
@@ -114,8 +129,8 @@ This uses real listening data from [ListenBrainz](https://listenbrainz.org) rath
 | --- | --- |
 | Discover and Create are locked | The MusicBrainz sync hasn't finished. Check the banner on **My Library**. |
 | Generation fails immediately | LM Studio isn't running, or no model is loaded. Re-run *Test Connection* in Settings. |
-| Every playlist fails, or output is empty | Model context is too small. Raise it to 8 K+ in LM Studio and regenerate. |
-| *"LM Studio ran out of context"* partway through | Too many playlists being generated at once for your model's context. Lower **Parallel requests** in *Settings → LLM* (default 3), or raise the model's context length. |
+| Every playlist fails, or output is empty | Model context is too small. Raise it to 8 K+ in LM Studio and regenerate — see [About your Mac and your model](#about-your-mac-and-your-model). |
+| *"LM Studio ran out of context"* partway through | Too many playlists being generated at once for your model's context. Lower **Parallel requests** in *Settings → LLM* (default 3), or raise the model's context length. This is the most common symptom of a model or Mac smaller than the one the defaults assume. |
 | *Add to Doppler* is refused | Doppler is still running. Quit it fully and try again. |
 | Lots of unusable picks, or struck-through tracks | The model drifted off the provided song list. Hit *Retry* on that playlist. |
 | Something else | Open the **Debug Log** (⌘⌥L) — every library, LLM and write operation is logged there. |
