@@ -31,6 +31,7 @@ xcodebuild -project MixTape.xcodeproj -scheme MixTape -configuration Debug -dest
 
 # Release build into ./build (git-ignored), then launch the .app
 ./build.sh
+./build.sh build     # build only, no launch — what release.sh calls
 
 open -a Xcode MixTape.xcodeproj   # or open in Xcode and ⌘R
 ```
@@ -39,7 +40,27 @@ No tests, lint config, or package manifests exist. No third-party dependencies �
 
 The build is warning-clean except for one known one: `main actor-isolated static property 'defaultSimilarityAlgorithm' can not be referenced from a nonisolated context` at [ListenBrainzClient.swift:272](MixTape/ListenBrainzClient.swift#L272). Pre-existing — you didn't introduce it.
 
-**Never `xcodebuild` a Release you intend to publish — use [build.sh](build.sh).** The four extra settings it passes are load-bearing for a public download, and its header comment explains each: without them the linker's debug map leaves the builder's `/Users/<you>/` path in the binary ~40 times (in the symbol table, so `strings` won't show it), and Xcode injects `com.apple.security.get-task-allow`, which lets any process attach a debugger to the shipped app. Ship **only** the `.app` — the `.dSYM` built alongside it contains full build paths by design.
+### Cutting a release
+
+**`./release.sh` is the whole procedure.** It reads `MARKETING_VERSION` from the project, builds Release via `./build.sh build`, audits the bundle, and packages `MixTape-<version>-<arch>.zip`. It stops there: publishing stays a deliberate act, so it prints the `git tag` / `gh release create` commands rather than running them.
+
+```sh
+./release.sh                  # build + audit + zip
+ALLOW_DIRTY=1 ./release.sh    # test build from a dirty tree (never for a real release)
+```
+
+Four things about it are load-bearing:
+
+- **The audit is a gate, not a report.** Every check is a hard failure and nothing gets packaged if one trips. The app is a free download to people who can't inspect it, and the two worst leaks are both invisible without a check: the linker's debug map (N_OSO stabs) names every `.o` by absolute path, embedding the builder's home directory dozens of times **in the symbol table where `strings` won't show it**, and Xcode injects `com.apple.security.get-task-allow` unless told not to, which lets any process attach a debugger to the shipped app. The script also refuses a bundle containing any `/Users/` path, the builder's username or hostname, build-machine paths, or an entitlement set that isn't exactly the four in [MixTape.entitlements](MixTape/MixTape.entitlements).
+- **It refuses a dirty tree.** A release claims some commit produces this binary; from a dirty tree that claim can't be checked and the tag won't rebuild to it.
+- **`ditto`, never `zip`.** `zip` mangles the code signature. `--keepParent` puts `MixTape.app` at the archive root.
+- **The `.dSYM` must never ship.** It carries full `DW_AT_comp_dir` build paths by design — that's what it's for. The script deletes the archive rather than ship one that slipped in.
+
+The stripping settings live in [build.sh](build.sh) (`DEPLOYMENT_POSTPROCESSING`, `STRIP_INSTALLED_PRODUCT`, `STRIP_STYLE=debugging`, `CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO`) so both paths get them from one place — **never `xcodebuild` a Release you intend to publish.**
+
+Releases are **ad-hoc signed** (no `DEVELOPMENT_TEAM`, by design), so Gatekeeper blocks the first launch and users right-click → Open once. Notarizing would need a Developer ID.
+
+The landing page's download button points at `/releases/latest` rather than a versioned asset URL, so publishing a release is the only step — there's no page edit to keep in sync and no window where the button 404s. (The sibling project My-Pod hardcodes its asset URLs and therefore has to cut the release *before* pushing the page; MixTape deliberately doesn't.) MixTape ships **arm64 only** and needs no dylib bundling — no third-party dependencies, so there is no `bundle-app.sh` equivalent.
 
 `agent_space/` is git-ignored scratch for working notes; nothing there is part of the build.
 

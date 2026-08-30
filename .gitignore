@@ -17,3 +17,7 @@ agent_space/
 
 # Affinity Designer lock files, present while the document is open.
 *~lock~
+
+# Release artifacts, built by ./release.sh. One per version; never committed.
+/MixTape-*.zip
+*.dSYM

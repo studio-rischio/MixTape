@@ -145,6 +145,18 @@ xcodebuild -project MixTape.xcodeproj -scheme MixTape \
 
 There are no tests, lint config, or package manifests. There are **no third-party dependencies** — the app uses only the system `SQLite3` C API, SwiftUI, AppKit, Foundation and OSLog.
 
+## Cutting a release
+
+```sh
+./release.sh
+```
+
+Builds Release, audits the bundle, and writes `MixTape-<version>-arm64.zip`. The version comes from `MARKETING_VERSION` in the project, and the script refuses to run on a dirty tree — a release should be rebuildable from the tag it ships under.
+
+The audit is the point of the script rather than a formality: the app is a free download, so every check is a hard failure. It rejects the build if the binary still carries the linker's debug map (which embeds the builder's home directory in the symbol table, where `strings` won't reveal it), if Xcode injected the `get-task-allow` debugging entitlement, if any file in the bundle mentions a `/Users/` path, the builder's username or hostname, or if the sandbox entitlements aren't exactly the four expected. Nothing is packaged unless all of it passes.
+
+It stops at a verified zip and prints the `git tag` / `gh release create` commands — publishing is never automatic. The download button on the landing page points at `/releases/latest`, so it starts working as soon as the release is up.
+
 The Xcode target uses `PBXFileSystemSynchronizedRootGroup`, so any file added to `MixTape/` is picked up automatically. Never hand-edit `project.pbxproj` to add sources.
 
 Build settings worth knowing: `MACOSX_DEPLOYMENT_TARGET = 15.7`, `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, `SWIFT_APPROACHABLE_CONCURRENCY = YES`, app sandbox on.

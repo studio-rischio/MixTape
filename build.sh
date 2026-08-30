@@ -26,9 +26,18 @@ set -euo pipefail
 # DW_AT_comp_dir build paths by design — that is what it is for — so it must
 # never be uploaded to a release.
 
+# Usage:
+#   ./build.sh           # build, then launch the .app
+#   ./build.sh build     # build only — what release.sh calls
+case "${1:-run}" in
+    run|build) ;;
+    *) echo "Unknown command: $1 (expected: build | run)" >&2; exit 1 ;;
+esac
+
 xcodebuild -project MixTape.xcodeproj \
   -scheme MixTape \
   -configuration Release \
+  -destination "platform=macOS,arch=$(uname -m)" \
   -derivedDataPath build \
   DEPLOYMENT_POSTPROCESSING=YES \
   STRIP_INSTALLED_PRODUCT=YES \
@@ -37,4 +46,4 @@ xcodebuild -project MixTape.xcodeproj \
   clean build
 
 # The app ends up at:
-open "build/Build/Products/Release/MixTape.app"
+[ "${1:-run}" = "build" ] || open "build/Build/Products/Release/MixTape.app"
