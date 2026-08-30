@@ -14,19 +14,24 @@
 <meta property="og:type" content="website">
 
 <style>
-  /* Palette lifted from the app itself (Theme.swift) so the page and the
-     product read as the same thing. The app is forced-dark, so the page
-     commits to dark too rather than trying to follow the visitor's theme. */
+  /* Palette lifted from the app itself (Theme.swift), which in turn is
+     sampled from the app icon, so the page and the product read as the same
+     thing. The app is forced-dark, so the page commits to dark too rather
+     than trying to follow the visitor's theme.
+
+     The primary button is amber with navy text (9.5:1) rather than the app's
+     blue accent: here the label colour is ours to choose, so the CTA can use
+     the icon's own logic — yellow ground, navy ink. Links stay sky blue, the
+     way they are in the app's controls. */
   :root {
-    --bg:            #0c0a16;
-    --panel:         #1a1729;
-    --panel-raised:  #28243c;
-    --border:        rgba(217, 213, 240, 0.12);
-    --dark-purple:   #4840a8;
-    --light-purple:  #6c5acc;
-    --lavender:      #d9d5f0;
-    --text:          #ece9f8;
-    --muted:         #9a94b8;
+    --bg:            #070c18;
+    --panel:         #1a2740;
+    --border:        rgba(243, 236, 218, 0.12);   /* the icon's cream, at 12% */
+    --amber:         #fbac17;
+    --sky:           #18c3fb;
+    --navy:          #08162f;
+    --text:          #f0eee9;
+    --muted:         #97a3ba;
     --max:           1120px;
   }
 
@@ -45,7 +50,7 @@
     overflow-x: hidden;
   }
 
-  a { color: var(--lavender); }
+  a { color: var(--sky); }
 
   .wrap {
     max-width: var(--max);
@@ -62,7 +67,7 @@
     overflow: hidden;
   }
 
-  /* Soft purple bloom behind the icon, echoing the app's tile gradients. */
+  /* Soft amber bloom behind the icon, picking up its yellow ground. */
   .hero::before {
     content: "";
     position: absolute;
@@ -71,7 +76,7 @@
     transform: translateX(-50%);
     width: 900px;
     height: 620px;
-    background: radial-gradient(closest-side, rgba(108, 90, 204, 0.30), transparent 70%);
+    background: radial-gradient(closest-side, rgba(251, 172, 23, 0.20), transparent 70%);
     pointer-events: none;
     z-index: 0;
   }
@@ -123,11 +128,11 @@
   .btn:active { transform: translateY(1px); }
 
   .btn-primary {
-    background: var(--light-purple);
-    color: #fff;
+    background: var(--amber);
+    color: var(--navy);
   }
 
-  .btn-primary:hover { background: #7d6dd8; }
+  .btn-primary:hover { background: #ffc043; }
 
   .btn-secondary {
     background: transparent;
@@ -135,7 +140,7 @@
     border-color: var(--border);
   }
 
-  .btn-secondary:hover { border-color: rgba(217, 213, 240, 0.35); }
+  .btn-secondary:hover { border-color: rgba(243, 236, 218, 0.35); }
 
   .req-line {
     margin-top: 16px;
@@ -187,7 +192,7 @@
     font-weight: 700;
     letter-spacing: 0.09em;
     text-transform: uppercase;
-    color: var(--light-purple);
+    color: var(--amber);
     margin-bottom: 10px;
   }
 
@@ -250,6 +255,34 @@
     margin: 0;
     color: var(--muted);
     font-size: 0.95rem;
+  }
+
+  /* ---------- roadmap ---------- */
+
+  /* Planned work is marked on the card itself rather than in prose below it,
+     so a card can never be read as a shipping feature on its own. */
+  .card h3 .pill {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 9px;
+    border: 1px solid rgba(251, 172, 23, 0.45);
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--amber);
+    vertical-align: 2px;
+  }
+
+  .card.planned { border-style: dashed; }
+
+  .roadmap-note {
+    margin: 26px auto 0;
+    max-width: 720px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.92rem;
   }
 
   /* ---------- requirements ---------- */
@@ -321,7 +354,7 @@
 
 <header class="hero">
   <div class="wrap">
-    <img class="icon" src="app-icon.png" alt="MixTape app icon: a brain with a music note, on a purple rounded square">
+    <img class="icon" src="app-icon.png" alt="MixTape app icon: a friendly robot face with gear-shaped eyes, on a yellow rounded square" width="512" height="512">
     <h1>MixTape</h1>
     <p class="tagline">
       Themed playlists built from music you <strong>already own</strong>, invented by a
@@ -464,6 +497,35 @@
   </section>
 
   <section class="band">
+    <h2>Coming next: Plex and Jellyfin</h2>
+    <p class="band-sub">
+      Doppler is the only library MixTape reads today. Nothing about the way it works
+      is specific to Doppler, though — it reasons about artists, song titles and
+      listening data — so other libraries are the natural next step.
+    </p>
+    <div class="grid">
+      <div class="card planned">
+        <h3>Plex <span class="pill">Planned</span></h3>
+        <p>Generate from the music your Plex server already indexes, and write finished playlists back to it, without moving your collection anywhere.</p>
+      </div>
+      <div class="card planned">
+        <h3>Jellyfin <span class="pill">Planned</span></h3>
+        <p>The same for Jellyfin, so a fully self-hosted, fully open-source setup gets the same playlists as a local one.</p>
+      </div>
+      <div class="card planned">
+        <h3>Still nothing leaves your network <span class="pill">Planned</span></h3>
+        <p>A media server is one more machine you already run. Your library would be read over your own network, and the model would stay on your Mac.</p>
+      </div>
+    </div>
+    <p class="roadmap-note">
+      These are planned, not released — there's no date, and nothing on this page except
+      this section describes them. If you want them, say so in a
+      <a href="https://github.com/studio-rischio/MixTape/issues">GitHub issue</a>: it's a
+      good way to influence what gets built first.
+    </p>
+  </section>
+
+  <section class="band">
     <h2>What you'll need</h2>
     <p class="band-sub">Three things, two of which you probably already have.</p>
     <div class="reqs">
@@ -488,9 +550,10 @@
       <p>
         <strong>This is an unofficial, third-party project.</strong> It is not affiliated
         with, endorsed by, or supported by <strong>Brushed Type</strong>, the makers of
-        Doppler, nor by <strong>LM Studio</strong>. Doppler and LM Studio are the property
-        of their respective owners, and are referenced here only to describe what this app
-        works with.
+        Doppler, nor by <strong>LM Studio</strong>, <strong>Plex</strong> or
+        <strong>Jellyfin</strong>. All are the property of their respective owners, and are
+        referenced here only to describe what this app works with, or is planned to work
+        with.
       </p>
       <p style="margin-bottom:0">
         It writes directly to Doppler's database, which is not a documented or supported
